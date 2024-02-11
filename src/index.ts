@@ -159,3 +159,11 @@ logger.debug(
   'Configuration',
 );
 cron.start();
+
+const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
+signals.forEach((signal) =>
+  process.on(signal, () => {
+    logger.debug(`Process received a ${signal} signal, stop cron job.`);
+    cron.stop();
+  }),
+);
