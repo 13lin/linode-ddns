@@ -38,21 +38,10 @@ const fetchIpv6 = () =>
 
 const getIp = async () => {
   logger.debug('Getting IP address from icanhazip.com...');
-
-  const tasks = [];
-  if (!Config.RECORD_TYPES) {
-    tasks.push(fetchIpv4(), fetchIpv6());
-  } else {
-    if (Config.RECORD_TYPES.has('A')) {
-      tasks.push(fetchIpv4());
-    }
-
-    if (Config.RECORD_TYPES.has('AAAA')) {
-      tasks.push(fetchIpv6());
-    }
-  }
-
-  return await Promise.all(tasks);
+  return await Promise.all([
+    Config.RECORD_TYPES.has('A') ? fetchIpv4() : undefined,
+    Config.RECORD_TYPES.has('AAAA') ? fetchIpv6() : undefined,
+  ]);
 };
 
 const getDomainRecordDisplayName = (record: DomainRecord) =>
@@ -61,7 +50,7 @@ const getDomainRecordDisplayName = (record: DomainRecord) =>
 const updateDomainRecordsIp = async () => {
   const [ipv4, ipv6] = await getIp();
   const loggerWithIp = logger.child({
-    action: updateDomainRecordsIp.name,
+    action: 'updateDomainRecordsIp',
     ipv4,
     ipv6,
   });

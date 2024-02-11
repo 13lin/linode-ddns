@@ -1,3 +1,4 @@
+import { RecordType } from '@linode/api-v4';
 import { z } from 'zod';
 import 'dotenv/config';
 
@@ -7,11 +8,13 @@ const config = z
     LINODE_DOMAIN_ID: z.coerce.number().gt(0),
     HOSTNAMES: z.preprocess(
       (value) => (value ? new Set(JSON.parse(value as string)) : undefined),
-      z.set(z.string()).optional(),
+      z.set(z.string()).min(1).optional(),
     ),
     RECORD_TYPES: z.preprocess(
-      (value) => (value ? new Set(JSON.parse(value as string)) : undefined),
-      z.set(z.enum(['A', 'AAAA'])).optional(),
+      (value) => new Set(value ? JSON.parse(value as string) : ['A', 'AAAA']),
+      z
+        .set(z.enum<RecordType, [RecordType, ...RecordType[]]>(['A', 'AAAA']))
+        .min(1),
     ),
     CRON_TIME: z.preprocess(
       (value) => value || undefined,
